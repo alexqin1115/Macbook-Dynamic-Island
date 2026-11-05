@@ -59,6 +59,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if ProcessInfo.processInfo.environment["NOTCH_AUTO_EXPAND"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.store.setExpanded(true) }
         }
+        if ProcessInfo.processInfo.environment["NOTCH_DEMO"] != nil {
+            // Scripted run for recording the README clip: hover-expand, type a calculation, close.
+            let step: (Double, @escaping () -> Void) -> Void = { delay, work in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+            }
+            step(1.0) { [weak self] in self?.store.setExpanded(true) }
+            step(3.2) { [weak self] in self?.store.beginSearch() }
+            for (i, ch) in "12*(3+4)".enumerated() {
+                step(3.9 + 0.2 * Double(i)) { [weak self] in self?.store.search.query.append(ch) }
+            }
+            step(7.6) { [weak self] in self?.store.endSearch() }
+        }
         if let text = ProcessInfo.processInfo.environment["NOTCH_LATE_SEARCH"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.store.setExpanded(true) }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
@@ -161,7 +173,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func mouseMoved() {
-        guard let notch, ProcessInfo.processInfo.environment["NOTCH_AUTO_EXPAND"] == nil, ProcessInfo.processInfo.environment["NOTCH_AUTO_SEARCH"] == nil, ProcessInfo.processInfo.environment["NOTCH_LATE_SEARCH"] == nil else { return }
+        guard let notch, ProcessInfo.processInfo.environment["NOTCH_AUTO_EXPAND"] == nil, ProcessInfo.processInfo.environment["NOTCH_AUTO_SEARCH"] == nil, ProcessInfo.processInfo.environment["NOTCH_LATE_SEARCH"] == nil, ProcessInfo.processInfo.environment["NOTCH_DEMO"] == nil else { return }
         let point = NSEvent.mouseLocation
         if store.mode == .expanded {
             panel?.ignoresMouseEvents = !IslandLayout.expandedZone(notch: notch, extra: store.expandedExtra).contains(point)

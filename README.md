@@ -4,6 +4,8 @@ A Dynamic Island for the MacBook notch, built with SwiftUI and AppKit. It sits o
 
 > Independent project. Not affiliated with or endorsed by Apple.
 
+![Demo](docs/demo.gif)
+
 ![Features](docs/features.png)
 
 If you find it useful, a star helps other people discover it.

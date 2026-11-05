@@ -48,6 +48,8 @@ extension Color {
 }
 
 extension AnyTransition {
+    /// Content leaves faster than the shape collapses, so it never shows below the shrinking island.
+    static var islandRemoval: AnyTransition { .opacity.animation(.easeOut(duration: 0.1)) }
     static var islandContent: AnyTransition {
         .modifier(active: BlurFade(amount: 1), identity: BlurFade(amount: 0))
     }
@@ -147,13 +149,13 @@ struct IslandRootView: View {
             Group {
                 if store.mode == .expanded {
                     ExpandedView(store: store, notch: notch)
-                        .transition(.asymmetric(insertion: .opacity, removal: .islandContent))
+                        .transition(.asymmetric(insertion: .opacity, removal: .islandRemoval))
                 } else if store.mode == .prompt {
                     TouchIDPromptView(notch: notch, success: store.authSucceeded)
-                        .transition(.asymmetric(insertion: .opacity, removal: .islandContent))
+                        .transition(.asymmetric(insertion: .opacity, removal: .islandRemoval))
                 } else if store.mode == .alert {
                     AlertView(store: store, notch: notch)
-                        .transition(.asymmetric(insertion: .opacity, removal: .islandContent))
+                        .transition(.asymmetric(insertion: .opacity, removal: .islandRemoval))
                 } else if store.mode == .compact {
                     CompactView(store: store, notch: notch)
                         .transition(.islandContent)
