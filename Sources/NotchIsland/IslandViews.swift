@@ -159,7 +159,7 @@ struct IslandRootView: View {
                         .transition(.islandContent)
                 }
             }
-            .frame(width: size.width, height: size.height)
+            .frame(width: size.width, height: size.height, alignment: .top)
             .clipped()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -440,10 +440,9 @@ struct ExpandedView: View {
             // The search box is added below what is already there; the island grows to make room for it.
             if store.searching {
                 SearchView(model: store.search, onClose: store.endSearch)
-                    .transition(.opacity)
+                    .transition(.opacity.animation(.easeOut(duration: 0.2).delay(0.1)))
             }
         }
-        .animation(.easeOut(duration: 0.2).delay(0.1), value: store.searching)
         .padding(.horizontal, Metrics.inset)
         .padding(.bottom, Metrics.inset)
         .foregroundStyle(.white)
