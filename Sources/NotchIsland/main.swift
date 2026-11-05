@@ -15,6 +15,9 @@ final class IslandPanel: NSPanel {
 
 final class FirstMouseHostingView<Content: View>: NSHostingView<Content> {
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    // Under the notch a key window reports a top safe-area inset; without this the island slides down ~35pt when search takes focus.
+    override var safeAreaInsets: NSEdgeInsets { NSEdgeInsetsZero }
+    override var safeAreaRect: NSRect { bounds }
 }
 
 @MainActor
@@ -56,6 +59,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if ProcessInfo.processInfo.environment["NOTCH_AUTO_EXPAND"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.store.setExpanded(true) }
         }
+        if let text = ProcessInfo.processInfo.environment["NOTCH_LATE_SEARCH"] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.store.setExpanded(true) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                self?.store.beginSearch()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self?.store.search.query = text }
+            }
+        }
         if let text = ProcessInfo.processInfo.environment["NOTCH_AUTO_SEARCH"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                 self?.store.beginSearch()
@@ -76,12 +86,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         store.$searching.sink { [weak self] searching in
             guard let panel = self?.panel else { return }
             panel.allowKey = searching
+            // A non-activating panel can take the keyboard without activating the app; activating it makes
+            // the system menu bar redraw over the top of the island.
             if searching {
-                NSApp.activate(ignoringOtherApps: true)
-                DispatchQueue.main.async { panel.makeKeyAndOrderFront(nil) }
+                DispatchQueue.main.async { panel.makeKey() }
             } else if panel.isKeyWindow {
                 panel.resignKey()
-                NSApp.deactivate()
             }
         }.store(in: &cancellables)
         // Clicking away from the search field ends the search.
@@ -117,7 +127,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.isMovable = false
         panel.hidesOnDeactivate = false
         panel.ignoresMouseEvents = true
-        panel.contentView = FirstMouseHostingView(rootView: IslandRootView(store: store, notch: metrics))
+        let host = FirstMouseHostingView(rootView: IslandRootView(store: store, notch: metrics))
+        // While the window grows, keep already-rendered content pinned to the top instead of centred.
+        host.layerContentsPlacement = .top
+        panel.contentView = host
         panel.setFrame(IslandLayout.panelFrame(notch: metrics), display: true)
         panel.orderFrontRegardless()
         self.panel = panel
@@ -127,7 +140,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func fitPanel() {
         guard let panel, let notch else { return }
         let body = IslandLayout.bodySize(mode: store.mode, notch: notch, extra: store.expandedExtra)
-        let height = max(body.height, notch.height) + IslandLayout.shadowPadding
+        // While expanded the window keeps its tallest size: resizing it mid-animation makes the content slide
+        // down and back for a few frames. mouseMoved() lets clicks through the empty part instead.
+        let tallest = IslandLayout.expandedSize.height + IslandLayout.maxExtra
+        let height = (store.mode == .expanded ? tallest : max(body.height, notch.height)) + IslandLayout.shadowPadding
         var frame = IslandLayout.panelFrame(notch: notch)
         frame.origin.y = notch.topY - height
         frame.size.height = height
@@ -145,8 +161,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func mouseMoved() {
-        guard let notch, ProcessInfo.processInfo.environment["NOTCH_AUTO_EXPAND"] == nil, ProcessInfo.processInfo.environment["NOTCH_AUTO_SEARCH"] == nil else { return }
+        guard let notch, ProcessInfo.processInfo.environment["NOTCH_AUTO_EXPAND"] == nil, ProcessInfo.processInfo.environment["NOTCH_AUTO_SEARCH"] == nil, ProcessInfo.processInfo.environment["NOTCH_LATE_SEARCH"] == nil else { return }
         let point = NSEvent.mouseLocation
+        if store.mode == .expanded {
+            panel?.ignoresMouseEvents = !IslandLayout.expandedZone(notch: notch, extra: store.expandedExtra).contains(point)
+        }
         if store.mode == .alert || store.mode == .prompt { return }
         if store.mode == .expanded {
             if store.searching { return }

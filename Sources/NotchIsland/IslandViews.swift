@@ -166,6 +166,7 @@ struct IslandRootView: View {
         .animation(store.mode == .expanded || store.mode == .alert || store.mode == .prompt ? Motion.open : Motion.close, value: store.mode)
         .animation(Motion.morph, value: store.activity)
         .animation(Motion.morph, value: store.expandedExtra)
+        .ignoresSafeArea()
         .environment(\.colorScheme, .dark)
         .environment(\.locale, Locale(identifier: "en_US"))
     }
