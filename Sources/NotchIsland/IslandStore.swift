@@ -70,9 +70,13 @@ final class IslandStore: ObservableObject {
 
     /// Extra panel height beyond the base layout: Live Activity rows, or room for search results.
     var expandedExtra: CGFloat {
-        if searching { return 64 }
         let rows = CGFloat(min(liveActivities.count, 2)) * IslandLayout.extraRow
-        return music == nil ? rows - IslandLayout.idleTrim : rows
+        var extra = music == nil ? rows - IslandLayout.idleTrim : rows
+        if searching {
+            let results = CGFloat(min(search.results.count, 5))
+            extra += 12 + 36 + (results > 0 ? 8 + results * 32 : 0)
+        }
+        return extra
     }
     @Published var launchAtLogin = SMAppService.mainApp.status == .enabled
 
@@ -93,6 +97,7 @@ final class IslandStore: ObservableObject {
     private var capsTimer: Timer?
     private var authTimer: Timer?
     private var authShowing = false
+    private var searchObservers: Set<AnyCancellable> = []
     /// Last time the user cancelled by hand (click, Esc, Return); a prompt that closes without it was a Touch ID match.
     private var lastManualInput = Date.distantPast
     @Published var authSucceeded = false
@@ -103,6 +108,10 @@ final class IslandStore: ObservableObject {
     private var liveTimer: Timer?
 
     func start() {
+        // Result counts change the island's height, so the store must republish when the search model does.
+        search.objectWillChange.sink { [weak self] _ in
+            DispatchQueue.main.async { self?.objectWillChange.send() }
+        }.store(in: &searchObservers)
         let manual: (NSEvent) -> Void = { [weak self] e in
             if e.type == .leftMouseDown || [53, 36, 76].contains(e.keyCode) {
                 MainActor.assumeIsolated { self?.lastManualInput = Date() }

@@ -431,17 +431,19 @@ struct ExpandedView: View {
     var body: some View {
         VStack(spacing: 12) {
             header.reveal(shown, 0)
+            if !store.liveActivities.isEmpty {
+                LiveActivitiesView(activities: Array(store.liveActivities.prefix(2))).reveal(shown, 1)
+            }
+            if let music = store.music {
+                NowPlayingView(music: music, artwork: store.artwork, shown: shown)
+            }
+            // The search box is added below what is already there; the island grows to make room for it.
             if store.searching {
-                SearchView(model: store.search, onClose: store.endSearch).reveal(shown, 1)
-            } else {
-                if !store.liveActivities.isEmpty {
-                    LiveActivitiesView(activities: Array(store.liveActivities.prefix(2))).reveal(shown, 1)
-                }
-                if let music = store.music {
-                    NowPlayingView(music: music, artwork: store.artwork, shown: shown)
-                }
+                SearchView(model: store.search, onClose: store.endSearch)
+                    .transition(.opacity)
             }
         }
+        .animation(.easeOut(duration: 0.2).delay(0.1), value: store.searching)
         .padding(.horizontal, Metrics.inset)
         .padding(.bottom, Metrics.inset)
         .foregroundStyle(.white)

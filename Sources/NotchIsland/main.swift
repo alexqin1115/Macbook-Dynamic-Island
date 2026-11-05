@@ -70,6 +70,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in MainActor.assumeIsolated { self?.fitPanel() } }
             .store(in: &cancellables)
+        store.search.$results.receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in MainActor.assumeIsolated { self?.fitPanel() } }
+            .store(in: &cancellables)
         store.$searching.sink { [weak self] searching in
             guard let panel = self?.panel else { return }
             panel.allowKey = searching

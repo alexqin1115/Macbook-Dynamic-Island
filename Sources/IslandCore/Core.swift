@@ -42,7 +42,7 @@ public enum IslandLayout {
     public static let alertSize = CGSize(width: 400, height: 104)
     /// Height of one Live Activity row in the expanded panel, and the most extra height the panel can ever need.
     public static let extraRow: CGFloat = 46
-    public static let maxExtra: CGFloat = 150
+    public static let maxExtra: CGFloat = 290
     /// How much shorter the expanded panel is when nothing is playing.
     public static let idleTrim: CGFloat = 130
 

@@ -161,7 +161,6 @@ struct SearchView: View {
                 }
             }
             .animation(.snappy(duration: 0.2), value: model.results.map(\.id))
-            Spacer(minLength: 0)
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { focused = true }
