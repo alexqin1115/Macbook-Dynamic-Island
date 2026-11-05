@@ -4,6 +4,7 @@ set -euo pipefail
 # BUNDLE_ID: override the bundle identifier (changing it makes macOS ask for privacy permissions again).
 # ADHOC=1: always sign ad-hoc (use for release builds so no developer identity is embedded).
 BUNDLE_ID="${BUNDLE_ID:-com.macbookdynamicisland.NotchIsland}"
+VERSION="${VERSION:-0.1.1}"
 cd "$(dirname "$0")/.."
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 swift build -c release
@@ -20,7 +21,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundleName</key><string>NotchIsland</string>
   <key>CFBundleExecutable</key><string>NotchIsland</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.1.0</string>
+  <key>CFBundleShortVersionString</key><string>__VERSION__</string>
   <key>CFBundleVersion</key><string>1</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
@@ -30,7 +31,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </dict>
 </plist>
 PLIST
-sed -i '' "s/__BUNDLE_ID__/$BUNDLE_ID/g" "$APP/Contents/Info.plist"
+sed -i '' -e "s/__BUNDLE_ID__/$BUNDLE_ID/g" -e "s/__VERSION__/$VERSION/g" "$APP/Contents/Info.plist"
 # A stable identity keeps privacy grants (Full Disk Access) across rebuilds; ad-hoc signing resets them every time.
 IDENTITY=""
 if [ -z "${ADHOC:-}" ]; then

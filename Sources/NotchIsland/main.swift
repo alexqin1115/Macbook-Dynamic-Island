@@ -217,7 +217,7 @@ func renderSnapshots(to dir: String) {
         store.activity = activity
         let view = IslandRootView(store: store, notch: notch)
             .frame(width: 540, height: 380, alignment: .top)
-            .background(Color(white: 0.75))
+            .background(Color(white: 0.11))
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
         if let image = renderer.nsImage, let tiff = image.tiffRepresentation,
@@ -238,7 +238,7 @@ func renderAlertSnapshot(to dir: String) {
         store.incoming = kind == .call
             ? IncomingRequest(kind: .call, title: "Mom", subtitle: "iPhone call", acceptLabel: "Answer", declineLabel: "Decline")
             : IncomingRequest(kind: .airDrop, title: "Sam’s iPhone", subtitle: "wants to share a photo", acceptLabel: "Accept", declineLabel: "Decline")
-        let view = IslandRootView(store: store, notch: notch).frame(width: 540, height: 380, alignment: .top).background(Color(white: 0.75))
+        let view = IslandRootView(store: store, notch: notch).frame(width: 540, height: 380, alignment: .top).background(Color(white: 0.11))
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
         if let image = renderer.nsImage, let tiff = image.tiffRepresentation,

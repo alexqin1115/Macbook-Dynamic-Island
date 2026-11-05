@@ -4,6 +4,10 @@ A Dynamic Island for the MacBook notch, built with SwiftUI and AppKit. It sits o
 
 > Independent project. Not affiliated with or endorsed by Apple.
 
+![Features](docs/features.png)
+
+If you find it useful, a star helps other people discover it.
+
 ## Features
 
 - **Expanded panel** (hover the notch): time and date, battery, Now Playing (Apple Music / Spotify) with artwork, progress and controls, and Live Activities.
@@ -21,7 +25,7 @@ A Dynamic Island for the MacBook notch, built with SwiftUI and AppKit. It sits o
 
 ## Download
 
-Grab `NotchIsland-0.1.0-arm64.zip` from the [Releases](../../releases) page (Apple Silicon, macOS 14+), unzip it and move `NotchIsland.app` to `/Applications`.
+Grab `NotchIsland-0.1.1-arm64.zip` from the [Releases](../../releases) page (Apple Silicon, macOS 14+), unzip it and move `NotchIsland.app` to `/Applications`.
 
 The app is ad-hoc signed and not notarized, so macOS will block the first launch. Either right-click the app and choose **Open**, or run:
 
