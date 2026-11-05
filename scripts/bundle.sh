@@ -4,7 +4,7 @@ set -euo pipefail
 # BUNDLE_ID: override the bundle identifier (changing it makes macOS ask for privacy permissions again).
 # ADHOC=1: always sign ad-hoc (use for release builds so no developer identity is embedded).
 BUNDLE_ID="${BUNDLE_ID:-com.macbookdynamicisland.NotchIsland}"
-VERSION="${VERSION:-0.1.1}"
+VERSION="${VERSION:-0.1.2}"
 cd "$(dirname "$0")/.."
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 swift build -c release
